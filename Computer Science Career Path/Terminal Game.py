@@ -4,8 +4,8 @@ import random
 """
 Survive the night game 
 
-- There will be a hunge, thirst and fatigue bar
-- Stay warm (stoke the fire)
+- There will be a hunger, hydration and fatigue bar
+- Stay warm (stoke the fire) (reduces fatigue and lowers danger)
 - Stay awake to avoid danger
 - Danger bar increases as fatigue bar increases, wild animals can smell you.
 - Use random module to randomly decide whether an item break
@@ -15,7 +15,7 @@ Survive the night game
 
 
 class Player:
-    def __init__(self, hunger, fatigue, thirst):
+    def __init__(self, hunger, fatigue, hydration):
 
         # Variable used to record the start of the game
         self.start_time = 0
@@ -24,7 +24,7 @@ class Player:
         self.alive = True
         self.hunger = hunger
         self.fatigue = fatigue
-        self.thirst = thirst
+        self.hydration = hydration
         self.danger = 0
 
         # Inventory key (Dictionary holding the types of items. The dictionary inside each value is the item and the quantity of it left)
@@ -52,7 +52,7 @@ class Player:
         self.inventory["food"][food_item_index][1] -= 1
 
         # Display that the food item has been eaten
-        print(f'{self.inventory["food"][0][0]} has been eaten!')
+        print(f'{self.inventory["food"][food_item_index][0]} has been eaten!')
 
     def use_matchstick(self):
         #print(self.inventory["tools"]["Matchstick"])
@@ -87,8 +87,12 @@ class Player:
             if self.turns <= 0:
                 break
 
+
+            # Display the players' current stats
+            print(f"Hunger:{self.hunger}, Hydration:{self.hydration}, Fatigue:{self.fatigue}, Danger: {self.danger}")
+
             # Ask for user input from the player
-            action = self.ask_input(["1", "2", "3"], "Eat food (1), Drink food (2), Stoke fire (3) ")
+            action = self.ask_input(["1", "2", "3"], "Eat food (1), Re-hydrate (2), Stoke fire (3) ")
 
             # Based on the action, do something
             match action:
@@ -119,4 +123,28 @@ class Player:
                         # Take a turn away from the player
                         self.turns -= 1
 
-player = Player(100, 0, 0)
+                    # Pizza slices
+                    case "2":
+                        # If the quantity of food is greater than 0
+                        if self.inventory["food"][1][1] > 0:
+                            # Eat the pizza slice
+                            self.eat_food(1) # Feed in the index that the food is at
+                        else:
+                            print(f'There are no more {self.inventory["food"][1][0]}!')
+
+                        # Set choosing food variable back to False
+                        choosing_food = False
+                        # Take a turn away from the player
+                        self.turns -= 1
+
+
+            # Do the following after every turn
+            # Increase danger, hydration, hunger, fatigue
+            self.danger += 15
+            self.hydration -= 10
+            self.fatigue += 10
+            self.hunger += 15
+  
+
+
+player = Player(hunger = 0, hydration = 100, fatigue = 30)
