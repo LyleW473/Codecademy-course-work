@@ -1,0 +1,1 @@
+In CS101: Introduction to Programming, there is "missing" work. This is because most of it was covered inside the "Python 3" course, so only the new tasks and activities are included in the folder.
