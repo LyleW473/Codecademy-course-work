@@ -28,14 +28,20 @@ class Player:
         self.danger = 0
 
         # Inventory key (Dictionary holding the types of items. The dictionary inside each value is the item and the quantity of it left)
-        self.inventory = { "drinks": [["Litres of coffee", 0.5], ["Litres of water", 2]]    , "food": [  ["Cheese sandwich", 2], ["Left-over pizza slices", 2]   ]  ,  "tools" : [  ["Matchstick", 2], ["Lighter", 1] ]} 
+        self.inventory = { "drinks": [["Coffee", 0.5], ["Water", 2]]    , "food": [  ["Cheese sandwich", 2], ["Left-over pizza slices", 2]   ]  ,  "tools" : [  ["Matchstick", 2], ["Lighter", 1] ]} 
 
         # Tool status
         self.matchstick_active = False
         self.turns = 10
 
+        # Display the players' initial stats
+        print("-------------------------------------------------------------------------------------------------")
+        print(f"Hunger:{self.hunger}, Hydration:{self.hydration}, Fatigue:{self.fatigue}, Danger: {self.danger}, Turns remaining: {self.turns}")
+        print("-------------------------------------------------------------------------------------------------")
+
         # Start the game
         self.game() 
+
 
     def stoke_fire(self):
         # Check if a matchstick has been lit
@@ -43,10 +49,22 @@ class Player:
 
     # Use items
 
-    def quench_first(self):
-        # Choose drink
-        pass
+    def quench_thirst(self, drink_item_index):
+
+        # If the drink was coffee
+        if drink_item_index == 0:
+            # Decrement the quantity of the drink
+            self.inventory["drinks"][drink_item_index][1] -= 0.25
+            # Display message
+            print(f'0.25 litres of {self.inventory["drinks"][drink_item_index][0]} has been consumed! You are feeling refreshed!')
+
+        # If the drink was water
+        elif drink_item_index == 1:
+            # Decrement the quantity of the drink
+            self.inventory["drinks"][drink_item_index][1] -= 0.5
+            print(f'0.5 litres of {self.inventory["drinks"][drink_item_index][0]} has been consumed! That hit the spot..')
     
+
     def eat_food(self, food_item_index):
         # Decrement the quantity of the food
         self.inventory["food"][food_item_index][1] -= 1
@@ -78,7 +96,11 @@ class Player:
 
 
     def game(self):
+
+        # Actions 
+        choosing_action = True
         choosing_food = False
+        choosing_drink = False
 
         # While the player is alive
         while self.alive == True:
@@ -87,24 +109,28 @@ class Player:
             if self.turns <= 0:
                 break
 
+            # If the player can choose an action
+            if choosing_action == True:
+                # Ask for user input from the player
+                action = self.ask_input(["1", "2", "3"], "Eat food (1), Re-hydrate (2), Stoke fire (3) ")
 
-            # Display the players' current stats
-            print(f"Hunger:{self.hunger}, Hydration:{self.hydration}, Fatigue:{self.fatigue}, Danger: {self.danger}")
+                # Based on the action, do something
+                match action:
+                    # Eat food
+                    case "1":
+                        choosing_food = True
+                    # Re-hydrate
+                    case "2":
+                        choosing_drink = True
 
-            # Ask for user input from the player
-            action = self.ask_input(["1", "2", "3"], "Eat food (1), Re-hydrate (2), Stoke fire (3) ")
-
-            # Based on the action, do something
-            match action:
-                # Eat food
-                case "1":
-                    choosing_food = True 
+                # Set choosing action to False
+                choosing_action = False
 
             # Check if the player has chosen action 1
             if choosing_food == True:
 
                 # Ask for user input from the player
-                action = self.ask_input(["1", "2"],f'Eat one: {self.inventory["food"][0][0]} x {self.inventory["food"][0][1]} (1)  or {self.inventory["food"][1][0]} x {self.inventory["food"][1][1]} (2) ') 
+                action = self.ask_input(["1", "2", "3"],f'Eat one: {self.inventory["food"][0][0]} x {self.inventory["food"][0][1]} (1)  or {self.inventory["food"][1][0]} x {self.inventory["food"][1][1]} (2) or Go back (3) ') 
                 
                 
                 # Do the appropriate actions based on the choice made
@@ -114,37 +140,96 @@ class Player:
                         # If the quantity of food is greater than 0
                         if self.inventory["food"][0][1] > 0:
                             # Eat the cheese sandwich
-                            self.eat_food(0) # Feed in the index that the food is at
+                            self.eat_food(0) # Feed in the index that the food is at in the list
+                            # Set choosing food variable back to False
+                            choosing_food = False
+                            # Take a turn away from the player
+                            self.turns -= 1
                         else:
                             print(f'There are no more {self.inventory["food"][0][0]}es!')
 
-                        # Set choosing food variable back to False
-                        choosing_food = False
-                        # Take a turn away from the player
-                        self.turns -= 1
 
                     # Pizza slices
                     case "2":
                         # If the quantity of food is greater than 0
                         if self.inventory["food"][1][1] > 0:
                             # Eat the pizza slice
-                            self.eat_food(1) # Feed in the index that the food is at
+                            self.eat_food(1) # Feed in the index that the food is at in the list
+                            # Set choosing food variable back to False
+                            choosing_food = False
+                            # Take a turn away from the player
+                            self.turns -= 1
                         else:
                             print(f'There are no more {self.inventory["food"][1][0]}!')
 
-                        # Set choosing food variable back to False
+                    # Go back
+                    case "3":
+                        # Go back to choosing the action
                         choosing_food = False
-                        # Take a turn away from the player
-                        self.turns -= 1
+                        choosing_action = True
+
+            # Check if the player has chosen action 2:
+            if choosing_drink == True:
+
+                # Ask for user input from the player
+                action = self.ask_input(["1", "2", "3"],f'Drink 250 ml: {self.inventory["drinks"][0][0]} x {self.inventory["drinks"][0][1]} (1)  or {self.inventory["drinks"][1][0]} x {self.inventory["drinks"][1][1]} (2) or Go back (3) ') 
+            
+                # Do the appropriate actions based on the choice made
+                match action:
+                    # Coffee
+                    case "1":  
+                        # If the quantity of food is greater than 0
+                        if self.inventory["drinks"][0][1] > 0:
+                            # Drink coffee
+                            self.quench_thirst(0) # Feed in the index that the drink is at in the list
+                            # Set choosing drink variable back to False
+                            choosing_drink = False
+                            # Take a turn away from the player
+                            self.turns -= 1          
+                        else:
+                            print(f'There is no more {self.inventory["drinks"][0][0]}!')
+
+                    # Water
+                    case "2":  
+                        # If the quantity of food is greater than 0
+                        if self.inventory["drinks"][1][1] > 0:
+                            # Drink water
+                            self.quench_thirst(1) # Feed in the index that the drink in the list
+
+                            # Set choosing drink variable back to False
+                            choosing_drink = False
+                            # Take a turn away from the player
+                            self.turns -= 1
+                        else:
+                            print(f'There is no more {self.inventory["drinks"][1][0]}!')
+
+                    # Go back
+                    case "3":
+                        # Go back to choosing the action
+                        choosing_drink = False
+                        choosing_action = True
 
 
             # Do the following after every turn
-            # Increase danger, hydration, hunger, fatigue
-            self.danger += 15
-            self.hydration -= 10
-            self.fatigue += 10
-            self.hunger += 15
-  
+            # Only if the player isn't choosing a drink or food (this is in case that the player tried to e.g. eat a sandwich when there are none left)
+            if choosing_drink == False and choosing_food == False and choosing_action == False:
+                # Do the following after every turn
+                # Increase danger, hydration, hunger, fatigue
+                self.danger += 15
+                self.hydration -= 10
+                self.fatigue += 10
+                self.hunger += 15
+
+                # Reset all choosing variables
+                choosing_action = True
+                choosing_food = False
+                choosing_drink = False
+
+                # Display the players' current stats
+                print("-------------------------------------------------------------------------------------------------")
+                print(f"Hunger:{self.hunger}, Hydration:{self.hydration}, Fatigue:{self.fatigue}, Danger: {self.danger}, Turns remaining: {self.turns}")
+                print("-------------------------------------------------------------------------------------------------")
+    
 
 
 player = Player(hunger = 0, hydration = 100, fatigue = 30)
