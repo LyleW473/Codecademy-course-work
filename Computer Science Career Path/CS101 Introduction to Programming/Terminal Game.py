@@ -42,11 +42,6 @@ class Player:
         # Start the game
         self.game() 
 
-
-    def stoke_fire(self):
-        # Check if a matchstick has been lit
-        pass
-
     # Use items
 
     def quench_thirst(self, drink_item_index):
@@ -83,13 +78,42 @@ class Player:
         # Display that the food item has been eaten
         print(f'{self.inventory["food"][food_item_index][0]} has been eaten! Hunger is now {self.hunger}!')
 
-    def use_matchstick(self):
-        #print(self.inventory["tools"]["Matchstick"])
-        # Use random to decide whether the matchstick broke or not
-        pass
-    
-    def use_lighter(self):
-        pass
+    def light_fire(self, tool_item_index):
+        # 20 % chance of breaking
+        matchstick_random_number = random.randrange(0, 4)
+        # 5 % chance of breaking
+        lighter_random_number = random.randrange(0, 19) 
+
+        # If the matchstick was used
+        if tool_item_index == 0:
+            # If the random number is 3, then the matchstick broke
+            if matchstick_random_number == 3: # 3 = random selected number
+                print(f'The {self.inventory["tools"][tool_item_index][0]} broke!')
+
+            # If it isn't then the fire was successfully lit
+            else:
+                # Decrease danger (The minimum value is 0)
+                self.danger = max(0, self.danger - 10)
+                # Display message
+                print(f'The {self.inventory["tools"][tool_item_index][0]} successfully lit a fire! With light you feel more comfortable! Danger is now at {self.danger}')
+
+            # Decrement the quantity of the tool (regardless of whether it was successful or not)
+            self.inventory["tools"][tool_item_index][1] -= 1
+
+        # If the lighter was used
+        if tool_item_index == 1:
+            # If the random number is 9, then the lighter broke
+            if lighter_random_number == 9: # 9 = random selected number
+                print(f'The {self.inventory["tools"][tool_item_index][0]} stopped working!')
+                # Decrement the quantity of the tool as it is no longer working
+                self.inventory["tools"][tool_item_index][1] -= 1
+
+            # If it isn't then the fire was successfully lit
+            else:
+                # Decrease danger (The minimum value is 0)
+                self.danger = max(0, self.danger - 10)
+                # Display message
+                print(f'The {self.inventory["tools"][tool_item_index][0]} successfully lit a fire! With light you feel more comfortable! Danger is now at {self.danger}')
 
 
     # Support
@@ -112,6 +136,7 @@ class Player:
         choosing_action = True
         choosing_food = False
         choosing_drink = False
+        choosing_tool = False
 
         # While the player is alive
         while self.alive == True:
@@ -123,7 +148,7 @@ class Player:
             # If the player can choose an action
             if choosing_action == True:
                 # Ask for user input from the player
-                action = self.ask_input(["1", "2", "3"], "Eat food (1), Re-hydrate (2), Stoke fire (3) ")
+                action = self.ask_input(["1", "2", "3"], "Eat food (1), Re-hydrate (2), Light a fire (3) ")
 
                 # Based on the action, do something
                 match action:
@@ -133,6 +158,9 @@ class Player:
                     # Re-hydrate
                     case "2":
                         choosing_drink = True
+                    # Light a fire
+                    case "3":
+                        choosing_tool = True
 
                 # Set choosing action to False
                 choosing_action = False
@@ -189,7 +217,7 @@ class Player:
                 match action:
                     # Coffee
                     case "1":  
-                        # If the quantity of food is greater than 0
+                        # If the quantity of the drink is greater than 0
                         if self.inventory["drinks"][0][1] > 0:
                             # Drink coffee
                             self.quench_thirst(0) # Feed in the index that the drink is at in the list
@@ -202,7 +230,7 @@ class Player:
 
                     # Water
                     case "2":  
-                        # If the quantity of food is greater than 0
+                        # If the quantity of the drink is greater than 0
                         if self.inventory["drinks"][1][1] > 0:
                             # Drink water
                             self.quench_thirst(1) # Feed in the index that the drink in the list
@@ -220,10 +248,48 @@ class Player:
                         choosing_drink = False
                         choosing_action = True
 
+            # Check if the player has chosen action 3:
+            if choosing_tool == True:
+                # Ask for user input from the player
+                action = self.ask_input(["1", "2", "3"],f'Use one: {self.inventory["tools"][0][0]} x {self.inventory["tools"][0][1]} (1)  or {self.inventory["tools"][1][0]} x {self.inventory["tools"][1][1]} (2) or Go back (3) ') 
+            
+                # Do the appropriate actions based on the choice made
+                match action:
+                    # Matchstick
+                    case "1":  
+                        # If the quantity of the tool is greater than 0
+                        if self.inventory["tools"][0][1] > 0:
+                            # Light a fire using a matchstick
+                            self.light_fire(0)
+                            # Set choosing_tool variable back to False
+                            choosing_tool = False
+                            # Take a turn away from the player
+                            self.turns -= 1          
+                        else:
+                            print(f'You broke all the {self.inventory["tools"][0][0]}s...')
+
+                    # Lighter
+                    case "2":  
+                        # If the quantity of the tool is greater than 0
+                        if self.inventory["tools"][1][1] > 0:
+                            # Light a fire using the lighter
+                            self.light_fire(1)
+                            # Set choosing_tool variable back to False
+                            choosing_tool = False
+                            # Take a turn away from the player
+                            self.turns -= 1
+                        else:
+                            print(f'The {self.inventory["tools"][1][0]} stopped working!')
+
+                    # Go back
+                    case "3":
+                        # Go back to choosing the action
+                        choosing_tool = False
+                        choosing_action = True
 
             # Do the following after every turn
-            # Only if the player isn't choosing a drink or food (this is in case that the player tried to e.g. eat a sandwich when there are none left)
-            if choosing_drink == False and choosing_food == False and choosing_action == False:
+            # Only if the player has completed their turn completely e.g. have eaten food
+            if choosing_drink == False and choosing_food == False and choosing_action == False and choosing_tool == False:
                 # Do the following after every turn
                 # Increase danger, hydration, hunger, fatigue
                 self.danger += 15
@@ -241,6 +307,6 @@ class Player:
                 print(f"Hunger:{self.hunger}, Hydration:{self.hydration}, Fatigue:{self.fatigue}, Danger: {self.danger}, Turns remaining: {self.turns}")
                 print("-------------------------------------------------------------------------------------------------")
     
-
+        
 
 player = Player(hunger = 0, hydration = 100, fatigue = 30)
