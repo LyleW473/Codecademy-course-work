@@ -55,22 +55,33 @@ class Player:
         if drink_item_index == 0:
             # Decrement the quantity of the drink
             self.inventory["drinks"][drink_item_index][1] -= 0.25
+            # Decrease fatigue (The minimum value is 0
+            self.fatigue = max(0, self.fatigue - 40)
+            # Increase hydration slightly (The maximum value is 100)
+            self.hydration = min(self.hydration + 10, 100)
             # Display message
-            print(f'0.25 litres of {self.inventory["drinks"][drink_item_index][0]} has been consumed! You are feeling refreshed!')
+            print(f'0.25 litres of {self.inventory["drinks"][drink_item_index][0]} has been consumed! Fatigue is now {self.fatigue}! Hydration is now at {self.hydration}! You are feeling refreshed!')
+
 
         # If the drink was water
         elif drink_item_index == 1:
             # Decrement the quantity of the drink
             self.inventory["drinks"][drink_item_index][1] -= 0.5
-            print(f'0.5 litres of {self.inventory["drinks"][drink_item_index][0]} has been consumed! That hit the spot..')
+            # Increase hydration (The maximum value is 100)
+            self.hydration = min(self.hydration + 30, 100)
+            # Display message
+            print(f'0.5 litres of {self.inventory["drinks"][drink_item_index][0]} has been consumed! Hydration is now {self.hydration}! That hit the spot..')
     
 
     def eat_food(self, food_item_index):
         # Decrement the quantity of the food
         self.inventory["food"][food_item_index][1] -= 1
 
+        # Decrease hunger (The mninimum value is 0)
+        self.hunger = max(0, self.hunger - 30)
+
         # Display that the food item has been eaten
-        print(f'{self.inventory["food"][food_item_index][0]} has been eaten!')
+        print(f'{self.inventory["food"][food_item_index][0]} has been eaten! Hunger is now {self.hunger}!')
 
     def use_matchstick(self):
         #print(self.inventory["tools"]["Matchstick"])
@@ -218,7 +229,7 @@ class Player:
                 self.danger += 15
                 self.hydration -= 10
                 self.fatigue += 10
-                self.hunger += 15
+                self.hunger += 10
 
                 # Reset all choosing variables
                 choosing_action = True
