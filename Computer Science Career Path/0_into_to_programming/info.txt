@@ -1,0 +1,1 @@
+There is "missing" work in this folder, because most of it was covered inside the "Python 3" course, so only the new tasks and activities that were completed are included in the folder.
